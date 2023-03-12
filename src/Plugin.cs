@@ -1,4 +1,5 @@
 ﻿using BepInEx;
+using System.Runtime.CompilerServices;
 using System.Security.Permissions;
 
 // Allows access to private members
@@ -6,28 +7,28 @@ using System.Security.Permissions;
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
 #pragma warning restore CS0618
 
-namespace TestMod;
+namespace ScugAnims;
 
-[BepInPlugin("com.author.testmod", "Test Mod", "0.1.0")]
+[BepInPlugin("com.dual.more-slugcat-animations", "MoreScugAnims", "1.0.0")]
 sealed class Plugin : BaseUnityPlugin
 {
-    bool init;
+    sealed class PlayerData
+    {
+        public int cough;
+    }
+
+    readonly ConditionalWeakTable<Player, PlayerData> cwt = new();
+
+    PlayerData Data(Player p) => cwt.GetValue(p, _ => new());
 
     public void OnEnable()
     {
         // Add hooks here
-        On.RainWorld.OnModsInit += OnModsInit;
+        On.Player.Update += Player_Update;
     }
 
-    private void OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
+    private void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
     {
-        orig(self);
-
-        if (init) return;
-
-        init = true;
-
-        // Initialize assets, your mod config, and anything that uses RainWorld here
-        Logger.LogDebug("Hello world!");
+        orig(self, eu);
     }
 }
